@@ -12,3 +12,11 @@ window has elevated priviliges.
 Seems to work fine is on Ubuntu, not sure about Mac.
 
 This is a work in progress.  Not sure when/if I will get more time to work on this.
+
+Some things I hope to do in the future:
+
+-Make a better UI
+
+-Clean up threading, messy recursive calls and otherwise unintuitive/repetitive code
+
+-Add [optional] system tray icon
