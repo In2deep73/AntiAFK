@@ -1,3 +1,7 @@
+/**
+ * @author https://github.com/jeffament
+ */
+
 package mainPackage;
 
 import javafx.application.Application;

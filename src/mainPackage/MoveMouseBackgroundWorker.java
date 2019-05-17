@@ -1,3 +1,7 @@
+/**
+ * @author https://github.com/jeffament
+ */
+
 package mainPackage;
 
 import javafx.application.Platform;
@@ -12,15 +16,17 @@ public class MoveMouseBackgroundWorker implements Runnable {
     private int secondsLeft = -1;
     private int secondsLeftHardCopy;
     private volatile boolean wasLastMoveLeft = true;
-    public volatile boolean stopThread;
+    private volatile boolean stopThread;
+    private int[] mousePositionBeforeWaiting = new int[2];
+    private int[] mousePositionAfterWaiting = new int[2];
     private Controller controller;
     private String method;
 
-    public void setStopThread(boolean stopThread) {
+    void setStopThread(boolean stopThread) {
         this.stopThread = stopThread;
     }
 
-    public MoveMouseBackgroundWorker(Controller controller, int pixels, int totalSeconds) throws AWTException {
+    MoveMouseBackgroundWorker(Controller controller, int pixels, int totalSeconds) throws AWTException {
         this.robot = new Robot();
         this.controller = controller;
         this.pixels = pixels;
@@ -30,7 +36,7 @@ public class MoveMouseBackgroundWorker implements Runnable {
         this.stopThread = false;
     }
 
-    public MoveMouseBackgroundWorker(Controller controller,int pixels, int totalSeconds, int maxSeconds) throws AWTException {
+    MoveMouseBackgroundWorker(Controller controller, int pixels, int totalSeconds, int maxSeconds) throws AWTException {
         this.robot = new Robot();
         this.controller = controller;
         this.pixels = pixels;
@@ -48,40 +54,47 @@ public class MoveMouseBackgroundWorker implements Runnable {
 
         while (!stopThread) {
             try {
-                Point point = MouseInfo.getPointerInfo().getLocation();
-                int oldX = (int) point.getX();
-                int oldY = (int) point.getY();
-                Thread.sleep(1000);
-                point = MouseInfo.getPointerInfo().getLocation();
-                int newX = (int) point.getX();
-                int newY = (int) point.getY();
-                if (stopThread) {
-                    throw new InterruptedException();
-                }
-                if (newX != oldX || newY != oldY) {
-                    throw new Exception();
-                }
-                secondsWaiting++;
-                secondsLeft--;
+                mousePositionBeforeWaiting = getCurrentMousePosition();
+                sleepOneSecondAndIncrementCounters();
+                mousePositionAfterWaiting = getCurrentMousePosition();
+                if (stopThread) { throw new InterruptedException(); }
+                if (mouseMovedAfterWaiting()) { throw new Exception(); }
                 if (secondsWaiting == seconds) {
                     moveTheMouse();
                 }
                 if (secondsLeft == 0) {
                     Platform.runLater(() -> controller.updateUIOnAutomaticDisable(secondsLeftHardCopy));
-                    stopThread = true;
                     throw new InterruptedException();
                 } else {
                     controller.setTextArea(secondsWaiting, secondsLeft, this.method);
                 }
-            } catch (InterruptedException e) {
-                // stop button pressed
-            } catch (Exception e) {
-                // mouse manually moved
-                secondsWaiting = 0;
-                secondsLeft = secondsLeftHardCopy;
-                controller.setTextArea(secondsWaiting, secondsLeft, this.method);
-            }
+            } catch (InterruptedException ignored) {} // stop button pressed
+            catch (Exception e) { handleMouseManuallyMoved(); }
         }
+    }
+
+    private void sleepOneSecondAndIncrementCounters() throws InterruptedException {
+        Thread.sleep(1000);
+        secondsWaiting++;
+        secondsLeft--;
+    }
+
+    private boolean mouseMovedAfterWaiting() {
+        return !(mousePositionBeforeWaiting[0] == mousePositionAfterWaiting[0]
+                && mousePositionBeforeWaiting[1] == mousePositionAfterWaiting[1]);
+    }
+
+    private int[] getCurrentMousePosition() {
+        Point point = MouseInfo.getPointerInfo().getLocation();
+        int xPosition = (int) point.getX();
+        int yPosition = (int) point.getY();
+        return new int[]{xPosition, yPosition};
+    }
+
+    private void handleMouseManuallyMoved(){
+        secondsWaiting = 0;
+        secondsLeft = secondsLeftHardCopy;
+        controller.setTextArea(secondsWaiting, secondsLeft, this.method);
     }
 
     private void moveTheMouse() {

@@ -9,17 +9,8 @@ Changing the amount of pixels can be useful if you want your screen to stay aliv
 to see a certain number of pixels of movement before registering the user as present).
 
 If using on Windows, you may want to put the jar in an executable wrapper and grant it admin privileges (or make sure to not leave
-a window with admin priviliges as the active window), as the program cannot move the mouse without admin priviliges while the active
-window has elevated priviliges.
+a window with admin privileges as the active window), as the program cannot move the mouse without admin privileges while the currently focused
+window has elevated privileges.
 
-Seems to work fine on Ubuntu, not sure about Mac.
-
-This is a work in progress.  Not sure when/if I will get more time to work on this.
-
-Some things I hope to do in the future:
-
--Make a better UI
-
--Clean up threading, messy recursive calls and otherwise unintuitive/repetitive code
-
--Add [optional] system tray icon
+# Disclaimer
+This software is distributed AS IS with no warranty expressed or implied.  It the end user's sole responsibility to read and understand the code in this project before executing it on any machine.  I hereby release myself from any and all liabilities!

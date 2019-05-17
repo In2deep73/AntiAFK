@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainPackage.Controller">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="mainPackage.Controller">
     <center>
         <VBox alignment="TOP_CENTER" spacing="5.0" BorderPane.alignment="CENTER">
             <children>
@@ -43,7 +43,7 @@
                                 <Insets left="10.0" right="10.0" />
                             </padding>
                         </Label>
-                        <TextField id="tfSeconds" fx:id="tfMinutes" alignment="CENTER" layoutX="10.0" layoutY="10.0" maxWidth="40.0" text="0" />
+                        <TextField id="tfSeconds" fx:id="tfMinutes" alignment="CENTER" layoutX="10.0" layoutY="10.0" maxWidth="40.0" text="5" />
                         <Label text="Seconds:">
                             <HBox.margin>
                                 <Insets />
@@ -52,7 +52,7 @@
                                 <Insets left="10.0" right="10.0" />
                             </padding>
                         </Label>
-                        <TextField id="tfSeconds" fx:id="tfSeconds" alignment="CENTER" layoutX="159.0" layoutY="10.0" maxWidth="40.0" text="5" />
+                        <TextField id="tfSeconds" fx:id="tfSeconds" alignment="CENTER" layoutX="159.0" layoutY="10.0" maxWidth="40.0" text="0" />
                     </children>
                 </HBox>
                 <HBox alignment="CENTER_LEFT">

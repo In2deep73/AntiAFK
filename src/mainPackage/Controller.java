@@ -1,36 +1,30 @@
+/**
+ * @author https://github.com/jeffament
+ */
+
 package mainPackage;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
 import java.awt.AWTException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 
 public class Controller {
 
     @FXML
-    private TextField tfPixels;
-    @FXML
-    private TextField tfSeconds;
-    @FXML
-    private TextField tfMinutes;
-    @FXML
-    private TextField tfHours;
-    @FXML
-    private TextField tfMaxSeconds;
-    @FXML
-    private TextField tfMaxMinutes;
-    @FXML
-    private TextField tfMaxHours;
+    private TextField tfPixels, tfSeconds, tfMinutes, tfHours, tfMaxSeconds, tfMaxMinutes, tfMaxHours;
     @FXML
     private TextArea txtArea;
     @FXML
     private Button btnStart;
     @FXML
     private CheckBox cbMaxTime;
+
     private Thread thread;
     private MoveMouseBackgroundWorker moveMouseBackgroundWorker;
-
 
     public void onStartButtonClicked() throws AWTException {
         if (btnStart.getText().equals("Start") && errorCheck()) {
@@ -74,10 +68,18 @@ public class Controller {
 
     @FXML
     public void initialize() {
-        configureTextFieldsToBeNumbericalOnly();
+        Collection<TextField> textFields = Arrays.asList(tfPixels, tfSeconds, tfMinutes, tfHours, tfMaxSeconds, tfMaxMinutes, tfMaxHours);
+        // Configure TextFields to only accept numbers
+        for(TextField tf: textFields){
+            tf.textProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue.matches("\\d*")) {
+                    tf.setText(newValue.replaceAll("[^\\d]", ""));
+                }
+            });
+        }
     }
 
-    public void toggleAllSetEditables(boolean bool){
+    private void toggleAllSetEditables(boolean bool) {
         tfPixels.setEditable(bool);
         tfSeconds.setEditable(bool);
         tfMinutes.setEditable(bool);
@@ -88,7 +90,7 @@ public class Controller {
         cbMaxTime.setDisable(!bool);
     }
 
-    public boolean errorCheck() {
+    private boolean errorCheck() {
         if (tfPixels.getText().equals("") || tfSeconds.getText().equals("") || tfMinutes.getText().equals("") ||
                 tfHours.getText().equals("") || tfMaxSeconds.getText().equals("") || tfMaxMinutes.getText().equals("") ||
                 tfMaxHours.getText().equals("")) {
@@ -102,7 +104,7 @@ public class Controller {
         return true;
     }
 
-    public boolean doesItHaveAChanceToRun(int totSecs, int maxTotSecs) { //todo make both error checks restore the UI
+    private boolean doesItHaveAChanceToRun(int totSecs, int maxTotSecs) { //todo make both error checks restore the UI
         if (maxTotSecs < totSecs) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle("Warning");
@@ -123,45 +125,7 @@ public class Controller {
         return true;
     }
 
-    public void configureTextFieldsToBeNumbericalOnly() {
-        tfPixels.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfPixels.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        tfSeconds.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfSeconds.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        tfMinutes.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfMinutes.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        tfHours.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfHours.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        tfMaxSeconds.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfMaxSeconds.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        tfMaxMinutes.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfMaxMinutes.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-        tfMaxHours.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue.matches("\\d*")) {
-                tfMaxHours.setText(newValue.replaceAll("[^\\d]", ""));
-            }
-        });
-    }
-
-    public void setTextArea(int secs, int maxSecs, String method) {
+    void setTextArea(int secs, int maxSecs, String method) { //todo review logic here; possible candidate for else if
         if (method.equals("automaticallyEnd")) {
             txtArea.setText(buildString(secs, maxSecs, "automaticallyEnd"));
         }
@@ -172,54 +136,55 @@ public class Controller {
         }
     }
 
-    public String buildString(int secs, int maxSecs, String method) {
+    private String getTimeString(int secs) { // todo sloppy stringbuilder!
         int secsValue = secs % 60;
         int minsValue = (secs / 60) % 60;
         int hoursValue = secs / 3600;
-        String secondsString = "seconds", minsString = "minutes", hoursString = "hours", returnString = null;
-        if (secsValue == 1) secondsString = "second";
-        if (minsValue == 1) minsString = "minute";
-        if (hoursValue == 1) hoursString = "hour";
+        String secondsString = ((secsValue == 1) ? "second" : "seconds");
+        String minsString = ((minsValue == 1) ? "minute" : "minutes");
+        String hoursString = ((hoursValue == 1) ? "hour" : "hours");
 
-        if (method.equals("autoDisableActive")) {
-            return buildString(maxSecs, secs, "doAutoDisableByRecursiveFlip");
-        } else if (method.equals("autoDisableInactive")) {
-            if (hoursValue > 0) {
-                returnString = "Anti-AFK is running....The computer has been idle for " + hoursValue + " " + hoursString +
-                        ", " + minsValue + " " + minsString + " and " + secsValue + " " + secondsString;
-            } else if (minsValue > 0) {
-                returnString = "Anti-AFK is running....The computer has been idle for " + minsValue + " " + minsString +
-                        " and " + secsValue + " " + secondsString;
-            } else {
-                returnString = "Anti-AFK is running....The computer has been idle for " + secs + " " + secondsString;
-            }
-        } else if (method.equals("doAutoDisableByRecursiveFlip")) {
-            if (hoursValue > 0) {
-                returnString = "\nAnti-AFK will stop running if mouse not manually moved in " + hoursValue + " " + hoursString +
-                        ", " + minsValue + " " + minsString + " and " + secsValue + " " + secondsString;
-            } else if (minsValue > 0) {
-                returnString = "\nAnti-AFK will stop running if mouse not manually moved in " + minsValue + " " + minsString +
-                        " and " + secsValue + " " + secondsString;
-            } else {
-                returnString = "\nAnti-AFK will stop running if mouse not manually moved in " + secsValue + " " + secondsString;
-            }
-            return buildString(maxSecs, secs, "autoDisableInactive") + returnString;
-        } else if (method.equals("automaticallyEnd")) {
-            if (hoursValue > 0) {
-                returnString = "Anti-AFK automatically stopped after running for " + hoursValue + " " + hoursString +
-                        ", " + minsValue + " " + minsString + " and " + secsValue + " " + secondsString;
-            } else if (minsValue > 0) {
-                returnString = "Anti-AFK automatically stopped after running for " + minsValue + " " + minsString +
-                        " and " + secsValue + " " + secondsString;
-            } else {
-                returnString = "Anti-AFK automatically stopped after running for " + secs + " " + secondsString;
-            }
+        StringBuilder sb = new StringBuilder();
+
+        if(hoursValue>0){
+            sb.append(hoursValue).append(" ")
+                    .append(hoursString).append(", ");
+        }if(hoursValue>0 || minsValue>0){
+            sb.append(minsValue)
+                    .append(" ")
+                    .append(minsString)
+                    .append( " and ");
+        }
+
+        sb.append(secsValue)
+                .append(" ")
+                .append(secondsString);
+
+        return sb.toString();
+    }
+
+    private String buildString(int secs, int maxSecs, String method) {
+        String timeString = getTimeString(secs);
+        String returnString = null;
+        switch (method){
+            case "autoDisableActive":
+                returnString =  buildString(maxSecs, secs, "doAutoDisableByRecursiveFlip");
+                break;
+            case "autoDisableInactive":
+                returnString =  "Idle time: " + timeString;
+                break;
+            case "doAutoDisableByRecursiveFlip":
+                returnString = "\nStop running in: " + timeString;
+                return buildString(maxSecs, secs, "autoDisableInactive") + returnString;
+            case "automaticallyEnd":
+                return "Automatically stopped after " + timeString;
         }
         return returnString;
     }
 
-    public void updateUIOnAutomaticDisable(int maxSecs) {
+    void updateUIOnAutomaticDisable(int maxSecs) {
         btnStart.fire();
-        txtArea.setText(buildString(maxSecs, 0, "automaticallyEnd"));
+        String autoEndText = buildString(maxSecs, 0, "automaticallyEnd");
+        txtArea.setText(autoEndText);
     }
 }
